@@ -1,0 +1,42 @@
+function converter(inputFileId, outputFileId, timeFileId) {
+  var time1 = DriveApp.getFileById(inputFileId).getLastUpdated();
+  var time2 = DriveApp.getFileById(timeFileId).getBlob().getDataAsString();
+  console.log(time1 == time2);
+
+  if(time1 != time2){
+    var fileIn = DriveApp.getFileById(inputFileId);
+  var file = {
+        title: fileIn.getName().replace('.xlsx', '')
+      };
+  file = Drive.Files.insert(file, fileIn.getBlob(), {convert: true});
+
+    //var tmpp = DriveApp.getFileById("1YxGWiZsl83nFl_0Leui8lNsOlgj3xEuWUX-E2x2jZyc");
+    //var tmp = DriveApp.getFileById(file.id);
+    //tmpp.setContent(tmpp.getBlob());
+    //var flnm = tmp.getName().replace('.gsheet', '');
+    var fle1 = SpreadsheetApp.openById(file.id);
+    var fle1sheets = fle1.getSheets();
+    var fle2 = SpreadsheetApp.openById(outputFileId);
+    var fle2sheets = fle2.getSheets();
+    for(var i = 0; i < fle1.getNumSheets(); i = i + 1){
+      if(fle2sheets.length < i + 1){
+        var fle1shtNme = fle1sheets[i].getName();
+        fle2.insertSheet(fle1shtNme, i);
+        fle2 = SpreadsheetApp.openById(outputFileId);
+        fle2sheets = fle2.getSheets();
+      }
+      var values = fle1sheets[i].getDataRange().getValues();
+      fle2sheets[i].getRange(1, 1, values.length, values[0].length).setValues(values);
+      
+      
+    }
+    //var values = fle1[0].getDataRange().getValues();
+    //fle2[0].getRange(1, 1, values.length, values[0].length).setValues(values);
+    //Drive.Files.update(fle, tmpp.getId(), tmp.get, {newRevision: false, convert: true});
+    Drive.Files.remove(file.id);
+    DriveApp.getFileById(timeFileId).setContent(time1);
+  }
+}
+function onEdit(e){
+  converter("1-C63fLeVksXAqg2bpeIrPNo6KbMsP1OT", "1YxGWiZsl83nFl_0Leui8lNsOlgj3xEuWUX-E2x2jZyc", "1-CcxltHElEjn7ifc67u018bR4T45M8bc");
+}
